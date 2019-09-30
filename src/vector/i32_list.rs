@@ -1,18 +1,19 @@
 use crate::vector::{State, Path};
 use crate::gen::Reader;
+use crate::states::StateTypes;
 
-pub struct BoolStateList {
+pub struct I32List {
     pub path: Path,
-    pub items: Vec<Option<bool>>,
+    pub items: Vec<Option<i32>>,
 }
 
-impl BoolStateList
+impl I32List
 {
     pub fn add(&mut self, reader: &mut Reader) {
         let index = self.items.len() as u16;
 
         let path = self.path.derive(index);
-        self.items.push(Some(reader.next_bool()));
+        self.items.push(Some(reader.next_i32()));
     }
 
     pub fn remove(&mut self, reader: &mut Reader) {
@@ -37,8 +38,8 @@ impl BoolStateList
         }
     }
 
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
-        let mut list = BoolStateList::new(path);
+    pub fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
+        let mut list = I32List::new(path);
         let length = reader.next_u16();
         let size = reader.next_u16();
 
@@ -53,16 +54,27 @@ impl BoolStateList
         list
     }
 
-    fn replace_at(&mut self, reader: &mut Reader) {
-        let index = reader.next_u16() as usize;
+    pub fn replace_at(&mut self, reader: &mut Reader) {
+        if !reader.eof() {
+            let index = reader.next_u16() as usize;
 
-        if index >= self.items.len() {
-            for i in self.items.len()..(index + 1) {
-                self.items.push(None);
+            if index >= self.items.len() {
+                for i in self.items.len()..(index + 1) {
+                    self.items.push(None);
+                }
+            }
+
+            let path = self.path.derive(index as u16);
+            self.items[index] = Some(reader.next_i32());
+        }
+    }
+
+    pub fn nested(&mut self, index: u16) -> Option<StateTypes> {
+        if (index as usize) < self.items.len() {
+            if let Some(item) = &mut self.items[index as usize] {
+                return Some(StateTypes::I32(item));
             }
         }
-
-        let path = self.path.derive(index as u16);
-        self.items[index] = Some(reader.next_bool());
+        None
     }
 }

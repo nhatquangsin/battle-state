@@ -1,20 +1,20 @@
 use crate::vector::{State, Path};
 use crate::gen::Reader;
 use crate::CardState;
-use std::sync::Arc;
+use crate::states::StateTypes;
 
-pub struct StateList {
+pub struct CardStateList {
     pub path: Path,
-    pub items: Vec<Option<Arc<CardState>>>,
+    pub items: Vec<Option<CardState>>,
 }
 
-impl StateList
+impl CardStateList
 {
     pub fn add(&mut self, reader: &mut Reader) {
         let index = self.items.len() as u16;
 
         let path = self.path.derive(index);
-        self.items.push(Some(Arc::new(CardState::new(None).deserialize(reader, Some(path)))));
+        self.items.push(Some(CardState::deserialize(reader, Some(path))));
     }
 
     pub fn remove(&mut self, reader: &mut Reader) {
@@ -37,8 +37,8 @@ impl StateList
         }
     }
 
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
-        let mut list = StateList::new(path);
+    pub fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
+        let mut list = CardStateList::new(path);
         let length = reader.next_u16();
         let size = reader.next_u16();
 
@@ -53,25 +53,26 @@ impl StateList
         list
     }
 
-    fn replace_at(&mut self, reader: &mut Reader) {
-        let index = reader.next_u16() as usize;
+    pub fn replace_at(&mut self, reader: &mut Reader) {
+        if !reader.eof() {
+            let index = reader.next_u16() as usize;
 
-        if (index) >= self.items.len() {
-            for i in self.items.len()..(index + 1) {
-                self.items.push(None);
+            if (index) >= self.items.len() {
+                for i in self.items.len()..(index + 1) {
+                    self.items.push(None);
+                }
             }
-        }
 
-        let path = self.path.derive(index as u16);
-        self.items[index] = Some(Arc::new(CardState::new(None).deserialize(reader, Some(path))));
+            let path = self.path.derive(index as u16);
+            self.items[index] = Some(CardState::deserialize(reader, Some(path)));
+        }
     }
 
-    fn nested(&self, index: u16) -> Option<Arc<CardState>> {
-        if (index as usize) >= self.items.len() {
-            return None;
-        }
-        if let Some(item_ref) = self.items[index as usize].as_ref() {
-            return Some(Arc::clone(item_ref));
+    pub fn nested(&mut self, index: u16) -> Option<StateTypes> {
+        if (index as usize) < self.items.len() {
+            if let Some(item) = &mut self.items[index as usize] {
+                return Some(StateTypes::CardState(item));
+            }
         }
         None
     }

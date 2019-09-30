@@ -1,0 +1,76 @@
+use crate::vector::{State, Path};
+use crate::gen::Reader;
+use crate::states::{BattleState, StateTypes};
+
+pub struct BattleStateList {
+    pub path: Path,
+    pub items: Vec<Option<BattleState>>,
+}
+
+impl BattleStateList
+{
+    pub fn add(&mut self, reader: &mut Reader) {
+        let index = self.items.len() as u16;
+
+        let path = self.path.derive(index);
+        self.items.push(Some(BattleState::deserialize(reader, Some(path))));
+    }
+
+    pub fn remove(&mut self, reader: &mut Reader) {
+        let index = reader.next_u16() as usize;
+
+        if (index) < self.items.len() {
+            self.items[index] = None;
+        }
+    }
+
+    pub fn new(path: Option<Path>) -> Self {
+        let mut new_path: Path = Path::new();
+        if let Some(check_path) = path {
+            new_path = check_path;
+        }
+
+        Self {
+            path: new_path,
+            items: vec![],
+        }
+    }
+
+    pub fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
+        let mut list = BattleStateList::new(path);
+        let length = reader.next_u16();
+        let size = reader.next_u16();
+
+        for i in 0..length {
+            list.items.push(None);
+        }
+
+        for i in 0..size {
+            list.replace_at(reader);
+        }
+
+        list
+    }
+
+    pub fn replace_at(&mut self, reader: &mut Reader) {
+        let index = reader.next_u16() as usize;
+
+        if (index) >= self.items.len() {
+            for i in self.items.len()..(index + 1) {
+                self.items.push(None);
+            }
+        }
+
+        let path = self.path.derive(index as u16);
+        self.items[index] = Some(BattleState::deserialize(reader, Some(path)));
+    }
+
+    pub fn nested(&mut self, index: u16) -> Option<StateTypes> {
+        if (index as usize) < self.items.len() {
+            if let Some(item) = &mut self.items[index as usize] {
+                return Some(StateTypes::BattleState(item));
+            }
+        }
+        None
+    }
+}

@@ -1,8 +1,9 @@
 use crate::Reader;
 use crate::Path;
+use crate::states::StateTypes;
 
 pub trait State {
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self;
+    fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self;
     fn replace_at(&mut self, reader: &mut Reader);
-    fn nested(&self, index: u16) -> Option<Self> where Self: std::marker::Sized;
+    fn nested(&mut self, index: u16) -> Option<StateTypes> where Self: std::marker::Sized;
 }

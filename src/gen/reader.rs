@@ -33,7 +33,7 @@ impl Reader {
     }
 
     pub fn next_i32(&mut self) -> i32 {
-        ((self.next_u16() as i32) << 8 | self.next_u16() as i32) as i32
+        ((self.next_u16() as i32) << 16 | self.next_u16() as i32) as i32
     }
 
     pub fn next_bool(&mut self) -> bool {
@@ -42,13 +42,5 @@ impl Reader {
 
     pub fn offset(&self) -> usize {
         self.index
-    }
-
-    pub fn remain_byte_string(&self) -> String {
-        let mut str = String::from("");
-        for i in self.index..self.bytes.len() {
-            str.push_str(&format!("{}, ", self.bytes[i]));
-        }
-        str
     }
 }

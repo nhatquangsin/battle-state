@@ -1,5 +1,6 @@
 use crate::gen::Reader;
 use crate::vector::{State, Path, TypeInfo};
+use crate::states::state_types::StateTypes;
 
 pub struct BonusesLevel {
     pub path: Path,
@@ -26,12 +27,12 @@ impl BonusesLevel {
 }
 
 impl State for BonusesLevel {
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
+    fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
         let mut bonuses_level = Self::new(path);
         let length = reader.next_u16();
 
         for _i in 0..length {
-            card_state.replace_at(reader);
+            bonuses_level.replace_at(reader);
         }
 
         bonuses_level
@@ -50,7 +51,7 @@ impl State for BonusesLevel {
         }
     }
 
-    fn nested(&self, index: u16) -> Option<Self> {
+    fn nested(&mut self, index: u16) -> Option<StateTypes> {
         match index {
             _ => None,
         }

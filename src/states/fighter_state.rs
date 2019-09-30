@@ -1,6 +1,8 @@
 use crate::gen::Reader;
 use crate::vector::{State, Path, TypeInfo};
+use crate::states::state_types::StateTypes;
 
+#[derive(Debug)]
 pub struct FighterState {
     pub path: Path,
 
@@ -32,12 +34,16 @@ impl FighterState {
 }
 
 impl State for FighterState {
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
+    fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
         let mut fighter_state = Self::new(path);
         let length = reader.next_u16();
+        println!("          fighter state deserialize");
+        if length != 1 && length != 6 {
+            panic!("hello {}", length);
+        }
 
         for _i in 0..length {
-            card_state.replace_at(reader);
+            fighter_state.replace_at(reader);
         }
 
         fighter_state
@@ -46,6 +52,7 @@ impl State for FighterState {
     fn replace_at(&mut self, reader: &mut Reader) {
         if !reader.eof() {
             let index = reader.next_u16();
+            println!("          fighter state replace at {}", index);
 
             match index {
                 0 => self.fighter_id = reader.next_i32(),
@@ -59,7 +66,7 @@ impl State for FighterState {
         }
     }
 
-    fn nested(&self, index: u16) -> Option<Self> {
+    fn nested(&mut self, index: u16) -> Option<StateTypes> {
         match index {
             _ => None,
         }

@@ -1,5 +1,6 @@
 use crate::gen::Reader;
 use crate::vector::{State, Path, TypeInfo};
+use crate::states::state_types::StateTypes;
 
 pub struct CardState {
     pub path: Path,
@@ -34,7 +35,7 @@ impl CardState {
 }
 
 impl State for CardState {
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
+    fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
         let mut card_state = Self::new(path);
         let length = reader.next_u16();
 
@@ -62,7 +63,7 @@ impl State for CardState {
         }
     }
 
-    fn nested(&self, index: u16) -> Option<Self> {
+    fn nested(&mut self, index: u16) -> Option<StateTypes> {
         match index {
             _ => None,
         }

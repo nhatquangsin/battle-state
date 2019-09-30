@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+#[derive(Debug)]
 pub struct PathNode {
     parent: Option<Arc<Self>>,
     index: u16,
@@ -21,6 +22,7 @@ impl PathNode {
     }
 }
 
+#[derive(Debug)]
 pub struct Path {
     node: Arc<PathNode>,
 }

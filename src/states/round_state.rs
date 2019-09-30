@@ -1,17 +1,18 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo};
+use crate::vector::{State, Path, TypeInfo, CardStateList, I32List};
+use crate::states::state_types::StateTypes;
 
 pub struct RoundState {
     pub path: Path,
 
     pub phase: i32,
-    pub first_player_cards: StateList<CardState>,
+    pub first_player_cards: CardStateList,
     pub first_player_ready: bool,
-    pub second_player_cards: StateList<CardState>,
+    pub second_player_cards: CardStateList,
     pub second_player_ready: bool,
-    pub speed_order: StateList<i32>,
-    pub card_order: StateList<i32>,
-    pub triggered_effects: StateList<i32>,
+    pub speed_order: I32List,
+    pub card_order: I32List,
+    pub triggered_effects: I32List,
 }
 
 impl RoundState {
@@ -24,24 +25,24 @@ impl RoundState {
         Self {
             path: new_path,
             phase: 0,
-            first_player_cards: vec![],
+            first_player_cards: CardStateList::new(None),
             first_player_ready: false,
-            second_player_cards: vec![],
+            second_player_cards: CardStateList::new(None),
             second_player_ready: false,
-            speed_order: vec![],
-            card_order: vec![],
-            triggered_effects: vec![],
+            speed_order: I32List::new(None),
+            card_order: I32List::new(None),
+            triggered_effects: I32List::new(None),
         }
     }
 }
 
 impl State for RoundState {
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
+    fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
         let mut round_state = Self::new(path);
         let length = reader.next_u16();
 
         for _i in 0..length {
-            card_state.replace_at(reader);
+            round_state.replace_at(reader);
         }
 
         round_state
@@ -53,20 +54,25 @@ impl State for RoundState {
 
             match index {
                 0 => self.phase = reader.next_i32(),
-                1 => self.first_player_cards = StateList<CardState>.deserialize(reader, self.path.derive(1))
+                1 => self.first_player_cards = CardStateList::deserialize(reader, Some(self.path.derive(1))),
                 2 => self.first_player_ready = reader.next_bool(),
-                3 => self.second_player_cards = StateList<CardState>.deserialize(reader, self.path.derive(3))
+                3 => self.second_player_cards = CardStateList::deserialize(reader, Some(self.path.derive(3))),
                 4 => self.second_player_ready = reader.next_bool(),
-                5 => self.speed_order = StateList<i32>.deserialize(reader, self.path.derive(5))
-                6 => self.card_order = StateList<i32>.deserialize(reader, self.path.derive(6))
-                7 => self.triggered_effects = StateList<i32>.deserialize(reader, self.path.derive(7))
+                5 => self.speed_order = I32List::deserialize(reader, Some(self.path.derive(5))),
+                6 => self.card_order = I32List::deserialize(reader, Some(self.path.derive(6))),
+                7 => self.triggered_effects = I32List::deserialize(reader, Some(self.path.derive(7))),
                 _ => {},
             }
         }
     }
 
-    fn nested(&self, index: u16) -> Option<Self> {
+    fn nested(&mut self, index: u16) -> Option<StateTypes> {
         match index {
+            1 => Some(StateTypes::CardStateList(&mut self.first_player_cards)),
+            3 => Some(StateTypes::CardStateList(&mut self.second_player_cards)),
+            5 => Some(StateTypes::I32List(&mut self.speed_order)),
+            6 => Some(StateTypes::I32List(&mut self.card_order)),
+            7 => Some(StateTypes::I32List(&mut self.triggered_effects)),
             _ => None,
         }
     }

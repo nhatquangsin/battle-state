@@ -1,13 +1,14 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo};
+use crate::vector::{State, Path, TypeInfo, I32List, CardStateList, FighterStateList};
+use crate::states::state_types::StateTypes;
 
 pub struct TeamState {
     pub path: Path,
 
-    pub fighters: StateList<FighterState>,
-    pub secret_card_deck: StateList<i32>,
-    pub active_card_deck: StateList<CardState>,
-    pub discard_card_deck: StateList<i32>,
+    pub fighters: FighterStateList,
+    pub secret_card_deck: I32List,
+    pub active_card_deck: CardStateList,
+    pub discard_card_deck: I32List,
     pub energy: i32,
     pub surrendered: bool,
     pub index: i32,
@@ -22,10 +23,10 @@ impl TeamState {
 
         Self {
             path: new_path,
-            fighters: vec![],
-            secret_card_deck: vec![],
-            active_card_deck: vec![],
-            discard_card_deck: vec![],
+            fighters: FighterStateList::new(None),
+            secret_card_deck: I32List::new(None),
+            active_card_deck: CardStateList::new(None),
+            discard_card_deck: I32List::new(None),
             energy: 0,
             surrendered: false,
             index: 0,
@@ -34,12 +35,16 @@ impl TeamState {
 }
 
 impl State for TeamState {
-    fn deserialize(&mut self, reader: &mut Reader, path: Option<Path>) -> Self {
+    fn deserialize(reader: &mut Reader, path: Option<Path>) -> Self {
         let mut team_state = Self::new(path);
         let length = reader.next_u16();
+        println!("      team length {}", length);
+        if length != 1 && length != 7 {
+            panic!("team hello {}", length);
+        }
 
         for _i in 0..length {
-            card_state.replace_at(reader);
+            team_state.replace_at(reader);
         }
 
         team_state
@@ -48,12 +53,13 @@ impl State for TeamState {
     fn replace_at(&mut self, reader: &mut Reader) {
         if !reader.eof() {
             let index = reader.next_u16();
+            println!("      team index {}", index);
 
             match index {
-                0 => self.fighters = StateList<FighterState>.deserialize(reader, self.path.derive(0))
-                1 => self.secret_card_deck = StateList<i32>.deserialize(reader, self.path.derive(1))
-                2 => self.active_card_deck = StateList<CardState>.deserialize(reader, self.path.derive(2))
-                3 => self.discard_card_deck = StateList<i32>.deserialize(reader, self.path.derive(3))
+                0 => self.fighters = FighterStateList::deserialize(reader, Some(self.path.derive(0))),
+                1 => self.secret_card_deck = I32List::deserialize(reader, Some(self.path.derive(1))),
+                2 => self.active_card_deck = CardStateList::deserialize(reader, Some(self.path.derive(2))),
+                3 => self.discard_card_deck = I32List::deserialize(reader, Some(self.path.derive(3))),
                 4 => self.energy = reader.next_i32(),
                 5 => self.surrendered = reader.next_bool(),
                 6 => self.index = reader.next_i32(),
@@ -62,8 +68,12 @@ impl State for TeamState {
         }
     }
 
-    fn nested(&self, index: u16) -> Option<Self> {
+    fn nested(&mut self, index: u16) -> Option<StateTypes> {
         match index {
+            0 => Some(StateTypes::FighterStateList(&mut self.fighters)),
+            1 => Some(StateTypes::I32List(&mut self.secret_card_deck)),
+            2 => Some(StateTypes::CardStateList(&mut self.active_card_deck)),
+            3 => Some(StateTypes::I32List(&mut self.discard_card_deck)),
             _ => None,
         }
     }
