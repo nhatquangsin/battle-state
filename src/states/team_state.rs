@@ -1,5 +1,5 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo, I32List, CardStateList, FighterStateList};
+use crate::vector::{State, Path, I32List, CardStateList, FighterStateList};
 use crate::states::state_types::StateTypes;
 
 pub struct TeamState {

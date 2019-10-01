@@ -1,5 +1,5 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo, CardStateList, I32List};
+use crate::vector::{State, Path, CardStateList, I32List};
 use crate::states::state_types::StateTypes;
 
 pub struct RoundState {

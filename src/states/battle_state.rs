@@ -1,5 +1,5 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo, BuffStateList};
+use crate::vector::{State, Path, BuffStateList};
 use crate::states::{TeamState, RoundState, TurnState};
 use crate::states::state_types::StateTypes;
 

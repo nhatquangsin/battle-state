@@ -1,5 +1,5 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo};
+use crate::vector::{State, Path};
 use crate::states::state_types::StateTypes;
 
 #[derive(Debug)]

@@ -1,5 +1,5 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, TypeInfo, I32List};
+use crate::vector::{State, Path, I32List};
 use crate::states::{BonusesLevel};
 use crate::states::state_types::StateTypes;
 use std::fs::read;
