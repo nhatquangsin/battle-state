@@ -1,5 +1,6 @@
 use crate::vector::{State, Path};
 use crate::gen::Reader;
+use crate::states::StateTypes;
 
 pub struct BoolStateList {
     pub path: Path,
@@ -66,5 +67,12 @@ impl BoolStateList
             let path = self.path.derive(index as u16);
             self.items[index] = Some(reader.next_bool());
         }
+    }
+
+    pub fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::BoolList(self);
+        }
+        StateTypes::None
     }
 }

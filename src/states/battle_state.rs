@@ -63,14 +63,18 @@ impl State for BattleState {
         }
     }
 
-    fn nested(&mut self, index: u16) -> Option<StateTypes> {
+    fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::BattleState(self);
+        }
+        let index = reader.next_u16();
         match index {
-            0 => Some(StateTypes::TeamState(&mut self.first_team)),
-            1 => Some(StateTypes::TeamState(&mut self.second_team)),
-            2 => Some(StateTypes::BuffStateList(&mut self.buffs)),
-            3 => Some(StateTypes::RoundState(&mut self.round)),
-            4 => Some(StateTypes::TurnState(&mut self.turn)),
-            _ => None,
+            0 => self.first_team.nested( reader, path_length - 1),
+            1 => self.second_team.nested( reader, path_length - 1),
+            2 => self.buffs.nested( reader, path_length - 1),
+            3 => self.round.nested( reader, path_length - 1),
+            4 => self.turn.nested( reader, path_length - 1),
+            _ => StateTypes::None,
         }
     }
 }

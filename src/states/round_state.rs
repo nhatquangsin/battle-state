@@ -66,14 +66,18 @@ impl State for RoundState {
         }
     }
 
-    fn nested(&mut self, index: u16) -> Option<StateTypes> {
+    fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::RoundState(self);
+        }
+        let index = reader.next_u16();
         match index {
-            1 => Some(StateTypes::CardStateList(&mut self.first_player_cards)),
-            3 => Some(StateTypes::CardStateList(&mut self.second_player_cards)),
-            5 => Some(StateTypes::I32List(&mut self.speed_order)),
-            6 => Some(StateTypes::I32List(&mut self.card_order)),
-            7 => Some(StateTypes::I32List(&mut self.triggered_effects)),
-            _ => None,
+            1 => self.first_player_cards.nested(reader, path_length - 1),
+            3 => self.second_player_cards.nested( reader, path_length - 1),
+            5 => self.speed_order.nested( reader, path_length - 1),
+            6 => self.card_order.nested(reader, path_length - 1),
+            7 => self.triggered_effects.nested( reader, path_length - 1),
+            _ => StateTypes::None,
         }
     }
 }

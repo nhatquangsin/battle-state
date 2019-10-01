@@ -63,10 +63,11 @@ impl State for CardState {
         }
     }
 
-    fn nested(&mut self, index: u16) -> Option<StateTypes> {
-        match index {
-            _ => None,
+    fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::CardState(self);
         }
+        StateTypes::None
     }
 }
 

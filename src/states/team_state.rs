@@ -68,13 +68,17 @@ impl State for TeamState {
         }
     }
 
-    fn nested(&mut self, index: u16) -> Option<StateTypes> {
+    fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::TeamState(self);
+        }
+        let index = reader.next_u16();
         match index {
-            0 => Some(StateTypes::FighterStateList(&mut self.fighters)),
-            1 => Some(StateTypes::I32List(&mut self.secret_card_deck)),
-            2 => Some(StateTypes::CardStateList(&mut self.active_card_deck)),
-            3 => Some(StateTypes::I32List(&mut self.discard_card_deck)),
-            _ => None,
+            0 => self.fighters.nested(reader, path_length - 1),
+            1 => self.secret_card_deck.nested( reader, path_length - 1),
+            2 => self.active_card_deck.nested(reader, path_length - 1),
+            3 => self.discard_card_deck.nested( reader, path_length - 1),
+            _ => StateTypes::None,
         }
     }
 }

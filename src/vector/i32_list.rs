@@ -69,12 +69,10 @@ impl I32List
         }
     }
 
-    pub fn nested(&mut self, index: u16) -> Option<StateTypes> {
-        if (index as usize) < self.items.len() {
-            if let Some(item) = &mut self.items[index as usize] {
-                return Some(StateTypes::I32(item));
-            }
+    pub fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::I32List(self);
         }
-        None
+        StateTypes::None
     }
 }

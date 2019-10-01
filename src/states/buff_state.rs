@@ -2,6 +2,7 @@ use crate::gen::Reader;
 use crate::vector::{State, Path, TypeInfo, I32List};
 use crate::states::{BonusesLevel};
 use crate::states::state_types::StateTypes;
+use std::fs::read;
 
 pub struct BuffState {
     pub path: Path,
@@ -61,11 +62,15 @@ impl State for BuffState {
         }
     }
 
-    fn nested(&mut self, index: u16) -> Option<StateTypes> {
+    fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::BuffState(self);
+        }
+        let index = reader.next_u16();
         match index {
-            4 => Some(StateTypes::BonusesLevel(&mut self.bonuses)),
-            5 => Some(StateTypes::I32List(&mut self.fighters)),
-            _ => None,
+            4 => self.bonuses.nested(reader, path_length - 1),
+            5 => self.fighters.nested(reader, path_length - 1),
+            _ => StateTypes::None,
         }
     }
 }

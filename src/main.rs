@@ -27,6 +27,8 @@ fn main() {
                 print_fighter_state_list(&state.second_team.fighters);
             },
             1 => receive_update(&mut state, &mut reader),
+            2 => receive_add(&mut state, &mut reader),
+            3 => receive_remove(&mut state, &mut reader),
             _ => break,
         }
     }
@@ -42,63 +44,92 @@ fn main() {
 
 fn receive_update(state: &mut BattleState, reader: &mut Reader) {
     let path_length = reader.next_u16();
-    let nested_state = state.nested(reader.next_u16());
+    let nested_state = state.nested(reader, path_length);
     println!("receive update path length {}", path_length);
-    for i in 0..path_length {
-        println!("receive update i {}", i);
-        let nested_state = if let Some(nested_state) = nested_state {
-            match nested_state {
-                StateTypes::BattleState(data) => {
-                    data.nested(reader.next_u16())
-                },
-                _ => None
-            }
-        } else {
-            None
-        };
-    }
 
-//    if let Some(checked_state) = internal_state {
-//        match internal_state {
-//            StateTypes::BattleState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::BonusesLevel(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::BuffState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::CardState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::FighterState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::RoundState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::TeamState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::TurnState(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::BuffStateList(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::FighterStateList(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::CardStateList(data) => {
-//                data.replace_at(reader);
-//            },
-//            StateTypes::I32List(data) => {
-//                data.replace_at(reader);
-//            },
-//            _ => {},
-//        }
-//    }
+    match nested_state {
+        StateTypes::BattleState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::BonusesLevel(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::BuffState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::CardState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::FighterState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::RoundState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::TeamState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::TurnState(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::BuffStateList(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::FighterStateList(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::CardStateList(data) => {
+            data.replace_at(reader);
+        },
+        StateTypes::I32List(data) => {
+            data.replace_at(reader);
+        },
+        _ => {},
+    }
+}
+
+fn receive_add(state: &mut BattleState, reader: &mut Reader) {
+    let path_length = reader.next_u16();
+    let nested_state = state.nested(reader, path_length);
+    println!("receive add path length {}", path_length);
+
+    match nested_state {
+        StateTypes::BuffStateList(data) => {
+            data.add(reader);
+        },
+        StateTypes::FighterStateList(data) => {
+            data.add(reader);
+        },
+        StateTypes::CardStateList(data) => {
+            data.add(reader);
+        },
+        StateTypes::I32List(data) => {
+            data.add(reader);
+        },
+        _ => {},
+    }
+}
+
+fn receive_remove(state: &mut BattleState, reader: &mut Reader) {
+    let path_length = reader.next_u16();
+    let nested_state = state.nested(reader, path_length);
+    println!("receive remove path length {}", path_length);
+
+    match nested_state {
+        StateTypes::BuffStateList(data) => {
+            data.remove(reader);
+        },
+        StateTypes::FighterStateList(data) => {
+            data.remove(reader);
+        },
+        StateTypes::CardStateList(data) => {
+            data.remove(reader);
+        },
+        StateTypes::I32List(data) => {
+            data.remove(reader);
+        },
+        _ => {},
+    }
 }
 
 fn print_team_state(state: &TeamState) {

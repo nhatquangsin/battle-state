@@ -68,12 +68,16 @@ impl CardStateList
         }
     }
 
-    pub fn nested(&mut self, index: u16) -> Option<StateTypes> {
+    pub fn nested(&mut self, reader: &mut Reader, path_length: u16) -> StateTypes {
+        if path_length == 0 {
+            return StateTypes::CardStateList(self);
+        }
+        let index = reader.next_u16();
         if (index as usize) < self.items.len() {
             if let Some(item) = &mut self.items[index as usize] {
-                return Some(StateTypes::CardState(item));
+                return item.nested( reader, path_length - 1);
             }
         }
-        None
+        StateTypes::None
     }
 }
