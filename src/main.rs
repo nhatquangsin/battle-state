@@ -1,11 +1,13 @@
 pub mod gen;
 pub mod states;
 pub mod vector;
+pub mod state_list;
 
 use gen::Reader;
 use vector::Path;
 use states::{CardState, BattleState};
-use crate::vector::{State, FighterStateList, BuffStateList, I32List};
+use crate::vector::{State, I32List};
+use crate::state_list::{BuffStateList, FighterStateList};
 use crate::states::{TeamState, BuffState, RoundState, TurnState, StateTypes};
 
 fn main() {

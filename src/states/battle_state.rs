@@ -1,5 +1,6 @@
 use crate::gen::Reader;
-use crate::vector::{State, Path, BuffStateList};
+use crate::vector::{State, Path};
+use crate::state_list::BuffStateList;
 use crate::states::{TeamState, RoundState, TurnState};
 use crate::states::state_types::StateTypes;
 
@@ -38,7 +39,7 @@ impl State for BattleState {
         let mut battle_state = Self::new(path);
         let length = reader.next_u16();
         if length != 1 && length != 6 {
-            panic!("battle hello {}", length);
+            panic!("battle state error {}", length);
         }
 
         for _i in 0..length {
@@ -69,11 +70,11 @@ impl State for BattleState {
         }
         let index = reader.next_u16();
         match index {
-            0 => self.first_team.nested( reader, path_length - 1),
-            1 => self.second_team.nested( reader, path_length - 1),
-            2 => self.buffs.nested( reader, path_length - 1),
-            3 => self.round.nested( reader, path_length - 1),
-            4 => self.turn.nested( reader, path_length - 1),
+            0 => self.first_team.nested(reader, path_length - 1),
+            1 => self.second_team.nested(reader, path_length - 1),
+            2 => self.buffs.nested(reader, path_length - 1),
+            3 => self.round.nested(reader, path_length - 1),
+            4 => self.turn.nested(reader, path_length - 1),
             _ => StateTypes::None,
         }
     }
