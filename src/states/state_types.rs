@@ -1,6 +1,5 @@
 use crate::states::{BattleState, BonusesLevel, BuffState, CardState, FighterState, RoundState, TeamState, TurnState};
-use crate::vector::{I32List, BoolStateList};
-use crate::state_list::{BuffStateList, CardStateList, FighterStateList};
+use crate::state_list::{BuffStateList, CardStateList, FighterStateList, I32List, BoolStateList};
 
 pub enum StateTypes<'a> {
     BattleState(&'a mut BattleState),
